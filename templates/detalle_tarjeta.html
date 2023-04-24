@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block styles %}
+    <style>
+        .abono {
+            color: #008859;
+        }
+        .pago {
+            color: #56504c;
+        }
+    </style>
+{% endblock %}
+{% block titulo %}Detalle tarjeta{% endblock %}
+{% block body %}
+    <a href="{% url 'lista_tarjetas' %}" style="font-size: x-large;">⬅️ Volver 🏃</a>
+    <br>
+    <br>
+    <h3>{% if tarjeta %}Detalle de tarjeta: {{ tarjeta }}{% else %}Agregar tarjeta{% endif %}</h3>
+    <form method="post" action="{% if tarjeta %}{% url 'detalle_tarjeta' tarjeta.id %}{% else %}{% url 'agregar_tarjeta' %}{% endif %}" autocomplete="off">
+        {% csrf_token %}
+        <table>
+            {% for field in form %}
+                <tr>
+                    <td>{{ field.label }}</td>
+                    <td>{{ field }} {% if field.auto_id in 'id_numero id_cvv' %}<button id="{{ field.auto_id }}-btn" type="button" {% if tarjeta %}style="display: none"{% endif %}>Generar</button>{% endif %}</td>
+                    <td style="color: #dc143c">{{ field.errors.0 }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br><br>
+        <input type="submit" value="{% if tarjeta %}Actualizar datos{% else %}Agregar tarjeta{% endif %}">
+        {% if tarjeta %}<a href="{% url 'pagar_tarjeta' tarjeta.id %}">Pagar tarjeta</a>{% endif %}
+        <br><br>
+    </form>
+    {% if tarjeta %}
+        <table border="1">
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Detalle</th>
+                <th>Estado</th>
+                <th>Monto</th>
+                <th>Acciones</th>
+            </tr>
+            {% for transaccion in transacciones %}
+                <tr>
+                    <td class="mx-1">{{ transaccion.id }}</td>
+                    <td class="mx-1">{{ transaccion.fecha|date:"d/m/Y" }}</td>
+                    <td class="mx-1">{{ transaccion.detalle }}</td>
+                    <td class="mx-1">{{ transaccion.get_estado_display }}</td>
+                    <td class="mx-1 {% if transaccion.monto <= 0 %}abono{% else %}pago{% endif %}">$ {{ transaccion.monto|intcomma }}</td>
+                    <td>---</td>
+                </tr>
+            {% empty %}
+                <tr><th colspan="9">Cuando tengas transacciones, estas aparecerán aquí</th></tr>
+            {% endfor %}
+        </table>
+    {% endif %}
+{% endblock %}
+{% block sctipts %}
+    <script>
+        const numeroTarjeta = document.getElementById("id_numero");
+        const cvv = document.getElementById("id_cvv");
+        const numeroTarjetaBtn = document.getElementById("id_numero-btn");
+        const cvvBtn = document.getElementById("id_cvv-btn");
+        const fechaExpiracion = document.getElementById("id_fecha_expiracion");
+
+        function formatearNumeroTarjeta(input) {
+            let valor = input.value;
+            valor = valor.replace(/[^0-9-]/g, "");
+            valor = valor.replace(/-/g, "");
+            let nuevoValor = "";
+            for (let i = 0; i < valor.length; i++) {
+                if (i > 0 && i % 4 == 0) {
+                    nuevoValor += "-";
+                }
+                nuevoValor += valor.charAt(i);
+            }
+            input.value = nuevoValor;
+        }
+        numeroTarjeta.addEventListener("input", function() {
+            formatearNumeroTarjeta(this);
+        });
+        formatearNumeroTarjeta(numeroTarjeta);
+
+        function formatMMYY(input) {
+            let value = input.value.replace(/\D/g, "");
+            let month = value.slice(0, 2);
+            let year = value.slice(2);
+
+            if (value.length > 2) {
+                if (parseInt(month) === 0) {
+                    month = '01'
+                } else if (parseInt(month) > 12) {
+                    month = "12";
+                }
+                if (month.length === 1) {
+                    month = "0" + month;
+                }
+                if (year.length === 2 && parseInt(year) < 0) {
+                    year = "00";
+                } else if (parseInt(year) > 99) {
+                    year = "99";
+                }
+                value = `${month}/${year}`;
+            }
+            input.value = value;
+        }
+        fechaExpiracion.addEventListener("input", function() {
+            formatMMYY(this);
+        });
+        function formatCvv(input) {
+            let value = input.value.replace(/\D/g, "");
+            input.value = value.slice(0, 3);
+        }
+        cvv.addEventListener("input", function() {
+            formatCvv(this);
+        });
+
+        const randDigits = (n) => {
+            const minimo = Math.pow(10, n - 1);
+            const maximo = Math.pow(10, n) - 1;
+            const numero = Math.round(Math.random() * (maximo - minimo) + minimo);
+            return numero.toString();
+        }
+
+        numeroTarjetaBtn.addEventListener('click', () => {
+            numeroTarjeta.value = randDigits(16);
+            formatearNumeroTarjeta(numeroTarjeta);
+        });
+        cvvBtn.addEventListener('click', () => {
+            cvv.value = randDigits(3);
+        });
+    </script>
+{% endblock %}

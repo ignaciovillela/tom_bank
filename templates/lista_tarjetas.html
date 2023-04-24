@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load l10n %}
+
+{% block titulo %}Detalle tarjeta{% endblock %}
+{% block styles %}
+    <style>
+        .chip {
+            margin: 5px;
+            padding: 2px 5px;
+            font-size: 11px;
+            border-radius: 5px;
+            text-transform: uppercase;
+        }
+        .ok {
+            background-color: #2ba853;
+            color: #ffffff;
+        }
+        .err {
+            background-color: #dc143c;
+            color: #ffffff;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <a href="{% url 'agregar_tarjeta' %}">Agregar tarjeta</a>
+          Estado del sistema: <span class="chip {{ sistema_bloqueado|yesno:'err,ok' }}">{{ sistema_bloqueado|yesno:'Bloqueado,Desbloqueado' }}</span>
+    {% if sistema_bloqueado %}
+        <a href="{% url 'lista_tarjetas' %}?bloqueo=no">Desbloquear sistema</a>
+    {% else %}
+        <a href="{% url 'lista_tarjetas' %}?bloqueo=si">Bloquear sistema</a>
+    {% endif %}
+    <br>
+    <br>
+    <br>
+    <table border="1">
+        <tr>
+            <th>Numero</th>
+            <th>Nombre</th>
+            <th>Cvv</th>
+            <th>Fecha expiración</th>
+            <th>Vigente</th>
+            <th>Crédito</th>
+            <th>Monto usado</th>
+            <th>Saldo restante</th>
+            <th>Acciones</th>
+        </tr>
+        {% for tarjeta in tarjetas %}
+            <tr>
+                <td>{{ tarjeta.numero_display }}</td>
+                <td>{{ tarjeta.nombre }}</td>
+                <td>{{ tarjeta.cvv }}</td>
+                <td>{{ tarjeta.fecha_expiracion }}</td>
+                <td>{{ tarjeta.vigente|yesno:'Vigente,Vencida' }}</td>
+                <td>$ {{ tarjeta.credito|localize }}</td>
+                <td>$ {{ tarjeta.monto_usado|intcomma }}</td>
+                <td>$ {{ tarjeta.saldo_restante|localize }}</td>
+                <td><a href="{% url 'detalle_tarjeta' tarjeta.id %}">Ver detalles</a></td>
+            </tr>
+        {% empty %}
+            <tr><th colspan="9">Sin registros, primero crea una tarjeta</th></tr>
+        {% endfor %}
+    </table>
+{% endblock %}

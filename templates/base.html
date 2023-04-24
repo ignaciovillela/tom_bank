@@ -1,0 +1,24 @@
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{% block titulo %}TomBank{% endblock %}</title>
+        {% block styles %}{% endblock %}
+    </head>
+    <body>
+        {% block bienvenido %}<h1>Bienvenido administraTom 🐈‍⬛</h1>{% endblock %}
+        {% if messages %}
+            <div id="messages">
+                {% for message in messages %}
+                    <div>{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <br>
+        <br>
+        {% block body %}{% endblock %}
+    </body>
+    {% block sctipts %}{% endblock %}
+</html>

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block bienvenido %}Bienvenido a TomBank{% endblock %}
+{% block styles %}
+    <style>
+        .ok {
+            color: #2ba853;
+        }
+
+    </style>
+{% endblock %}
+{% block body %}
+    <br>
+    <br>
+    <span>El ID de la transacción es: <strong>$ {{ transaccion.id }}</strong></span>
+    <br>
+    <br>
+    <span>El monto a pagar es por: <strong>$ {{ transaccion.monto|intcomma }}</strong></span>
+    <br>
+    <br>
+    <h1 class="ok">La transacción se realizó con éxito.</h1>
+    {% if transaccion.redireccion_url %}
+        <h2>Serás redireccionado en <span id="tiempo-redireccion">5</span> segundos.</h2>
+    {% else %}
+        <h2>Ya puedes cerrar esta ventana y volver al sitio de la compra.</h2>
+    {% endif %}
+{% endblock %}
+{% block sctipts %}
+    <script>
+        {% if transaccion.redireccion_url %}
+            const tiempoRedireccion = document.getElementById('tiempo-redireccion');
+            const segundos = 5;
+            let segundosRestantes = segundos;
+            setTimeout(() => {
+                window.location.replace("{{ transaccion.redireccion_url }}");
+            }, segundos * 1000);
+            setInterval(() => {
+                segundosRestantes--;
+                tiempoRedireccion.innerText = segundosRestantes;
+            }, 1000);
+        {% endif %}
+    </script>
+{% endblock %}

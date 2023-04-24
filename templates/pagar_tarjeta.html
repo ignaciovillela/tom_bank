@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block titulo %}Pagar tarjeta{% endblock %}
+{% block body %}
+    <a href="{% url 'detalle_tarjeta' tarjeta.id %}">⬅️ Detalle de tarjeta</a>
+    <br>
+    <br>
+    <span>Pago de tarjeta de <strong>{{ tarjeta.nombre }}</strong> número <strong>{{ tarjeta }}</strong></span>
+    <br>
+    <br>
+    <span>El monto adeudado es de: {{ tarjeta.monto_usado }}</span>
+    <br>
+    <br>
+    <form method="post" action="{% url 'pagar_tarjeta' tarjeta.id %}" autocomplete="off">
+        {% csrf_token %}
+        <table>
+            {% for field in form %}
+                <tr>
+                    <td>{{ field.label }}</td>
+                    <td>{{ field }} {% if field.auto_id == 'id_monto' %}<button id="total" type="button">Monto total</button>{% endif %}</td>
+                    <td style="color: #dc143c">{{ field.errors.0 }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+        <br><br>
+        <input type="submit" value="Pagar tarjeta">
+    </form>
+{% endblock %}
+{% block sctipts %}
+    <script>
+        const monto = document.getElementById('id_monto');
+        const pagarTotal = document.getElementById('total');
+        pagarTotal.addEventListener('click', () => {
+            monto.value = '{{ tarjeta.monto_usado }}';
+        });
+
+    </script>
+{% endblock %}
