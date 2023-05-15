@@ -1,9 +1,11 @@
+from django.conf import settings
+from django.conf.urls.static import static
 from django.urls import path, reverse_lazy
 from django.views.generic import RedirectView
 
 from tom.views import (
-    api_anular_pago, lista_tarjetas, pagar_tarjeta, detalle_tarjeta,
-    api_realizar_pago, api_verificar_pago, realizar_pago,
+    api_anular_pago, api_realizar_pago, api_verificar_pago, detalle_tarjeta,
+    lista_tarjetas, pagar_tarjeta, realizar_pago,
 )
 
 urlpatterns = [
@@ -19,3 +21,6 @@ urlpatterns = [
     path('api/anular_pago/', api_anular_pago, name='api_anular_pago'),
     path('api/verificar_pago/', api_verificar_pago, name='api_verificar_pago'),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

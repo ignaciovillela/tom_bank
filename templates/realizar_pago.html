@@ -14,37 +14,39 @@
     </style>
 {% endblock %}
 {% block body %}
-    <br>
-    <br>
-    <span>El ID de la transacción es: <strong>$ {{ transaccion.id }}</strong></span>
-    <br>
-    <br>
-    <span>El monto a pagar es por: <strong>$ {{ transaccion.monto|intcomma }}</strong></span>
-    <br>
-    <br>
-    <span>Tiempo para realizar el pago: <strong id="tiempo-restante"></strong></span>
-    <br>
-    <br>
-    {% if form.non_field_errors %}
-        <span class="chip-err">{{ form.non_field_errors.0 }}</span>
+    <div class="pay-card">
         <br>
         <br>
-    {% endif %}
-    <form method="post" action="{% url 'realizar_pago' transaccion.id %}" autocomplete="off">
-        Ingrese los datos de su tarjeta para realzar el pago
-        {% csrf_token %}
-        <table>
-            {% for field in form %}
-                <tr>
-                    <td>{{ field.label }}</td>
-                    <td>{{ field }}</td>
-                    <td style="color: #dc143c">{{ field.errors.0 }}</td>
-                </tr>
-            {% endfor %}
-        </table>
-        <br><br>
-        <input type="submit" value="Realizar pago">
-    </form>
+        <span>El ID de la transacción es: <strong>$ {{ transaccion.id }}</strong></span>
+        <br>
+        <br>
+        <span>El monto a pagar es por: <strong>$ {{ transaccion.monto|intcomma }}</strong></span>
+        <br>
+        <br>
+        <span>Tiempo para realizar el pago: <strong id="tiempo-restante"></strong></span>
+        <br>
+        <br>
+        {% if form.non_field_errors %}
+            <span class="chip-err">{{ form.non_field_errors.0 }}</span>
+            <br>
+            <br>
+        {% endif %}
+        <form method="post" action="{% url 'realizar_pago' transaccion.id %}" autocomplete="off">
+            Ingrese los datos de su tarjeta para realzar el pago
+            {% csrf_token %}
+            <table>
+                {% for field in form %}
+                    <tr>
+                        <td>{{ field.label }}</td>
+                        <td>{{ field }}</td>
+                        <td style="color: #dc143c">{{ field.errors.0 }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <br><br>
+            <input type="submit" value="Realizar pago">
+        </form>
+    </div>
 {% endblock %}
 {% block sctipts %}
     <script>

@@ -1,4 +1,5 @@
 import re
+from decimal import Decimal
 
 from django import forms
 from django.contrib import messages
@@ -7,6 +8,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 
 from tom import Data
+from tom.async_process import make_request
 from tom.models import Tarjeta, Transaccion
 
 
@@ -164,6 +166,7 @@ def realizar_pago(request, uuid):
     try:
         transaccion = Transaccion.objects.get(id=uuid, estado=Transaccion.Estados.PENDIENTE)
         if transaccion.get_expirado():
+            make_request(transaccion.error_url)
             raise transaccion.DoesNotExist
     except Transaccion.DoesNotExist:
         texto = 'Error: transacción no encontrada o no está pendiente'
@@ -177,6 +180,7 @@ def realizar_pago(request, uuid):
     }
     if form.is_valid():
         c['transaccion'] = form.save()
+        make_request(transaccion.success_url)
         return render(request, 'pago_realizado.html', c)
     return render(request, 'realizar_pago.html', c)
 
@@ -188,7 +192,7 @@ def api_realizar_pago(request):
     if not all(x in request.GET for x in required_data):
         return JsonResponse({'error': f'Se deben enviar los siguientes datos: {", ".join(required_data)}'}, status=400)
     transaccion = Transaccion.crear_transaccion_pendiente(
-        request.GET['monto'],
+        Decimal(request.GET['monto']),
         request.GET['detalle'],
         request.GET['success_url'],
         request.GET['error_url'],
